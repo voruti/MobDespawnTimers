@@ -1,15 +1,12 @@
 package dev.shadowsoffire.despawntimers;
 
 import net.minecraft.world.entity.Entity;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.common.ForgeConfigSpec.LongValue;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.living.MobSpawnEvent.AllowDespawn;
-import net.minecraftforge.eventbus.api.Event.Result;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.entity.living.MobDespawnEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ModConfig;
 
 // The value here should match an entry in the META-INF/neoforge.mods.toml file
 @Mod(MobDespawnTimers.MODID)
@@ -31,10 +28,10 @@ public class MobDespawnTimers {
 
     // You can use SubscribeEvent and let the Event Bus discover methods to call
     @SubscribeEvent
-    public void onDespawn(AllowDespawn event) {
+    public void onDespawn(MobDespawnEvent event) {
         Entity ent = event.getEntity();
-        if (Config.getDespawnDelay() >= ent.tickCount) {
-            event.setResult(Result.DENY);
+        if (Config.despawnDelay >= ent.tickCount) {
+            event.setResult(MobDespawnEvent.Result.DENY);
         }
     }
 }
