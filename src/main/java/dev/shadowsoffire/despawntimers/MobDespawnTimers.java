@@ -1,9 +1,5 @@
 package dev.shadowsoffire.despawntimers;
 
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import net.minecraft.world.entity.Entity;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.LongValue;
@@ -15,42 +11,30 @@ import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 
+// The value here should match an entry in the META-INF/neoforge.mods.toml file
 @Mod(MobDespawnTimers.MODID)
 public class MobDespawnTimers {
-
+    // Define mod id in a common place for everything to reference
     public static final String MODID = "despawntimers";
-    public static final Logger LOGGER = LogManager.getLogger(MODID);
 
-    public MobDespawnTimers() {
-        MinecraftForge.EVENT_BUS.register(this);
-        ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, Config.SPEC);
+    // The constructor for the mod class is the first code that is run when your mod is loaded.
+    // FML will recognize some parameter types like IEventBus or ModContainer and pass them in automatically.
+    public MobDespawnTimers(ModContainer modContainer) {
+        // Register ourselves for server and other game events we are interested in.
+        // Note that this is necessary if and only if we want *this* class (MobDespawnTimers) to respond directly to events.
+        // Do not add this line if there are no @SubscribeEvent-annotated functions in this class, like onServerStarting() below.
+        NeoForge.EVENT_BUS.register(this);
+
+        // Register our mod's ModConfigSpec so that FML can create and load the config file for us
+        modContainer.registerConfig(ModConfig.Type.SERVER, Config.SPEC);
     }
 
+    // You can use SubscribeEvent and let the Event Bus discover methods to call
     @SubscribeEvent
-    public void onDespawn(AllowDespawn e) {
-        Entity ent = e.getEntity();
+    public void onDespawn(AllowDespawn event) {
+        Entity ent = event.getEntity();
         if (Config.getDespawnDelay() >= ent.tickCount) {
-            e.setResult(Result.DENY);
-        }
-    }
-
-    public static class Config {
-        public static final ForgeConfigSpec SPEC;
-        public static final Config INSTANCE;
-        static {
-            Pair<Config, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(Config::new);
-            SPEC = specPair.getRight();
-            INSTANCE = specPair.getLeft();
-        }
-
-        public final LongValue despawnDelay;
-
-        public Config(ForgeConfigSpec.Builder b) {
-            this.despawnDelay = b.comment("The time, in ticks, that a mob may not despawn for after spawning.").defineInRange("despawn_delay", 600, 0, Long.MAX_VALUE);
-        }
-
-        public static long getDespawnDelay() {
-            return INSTANCE.despawnDelay.get();
+            event.setResult(Result.DENY);
         }
     }
 }
