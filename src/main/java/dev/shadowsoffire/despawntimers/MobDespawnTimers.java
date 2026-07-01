@@ -29,11 +29,19 @@ public class MobDespawnTimers {
     modContainer.registerConfig(ModConfig.Type.SERVER, Config.SPEC);
   }
 
+  private long getDespawnDelay() {
+    try {
+      return Config.DESPAWN_DELAY.getAsLong();
+    } catch (NullPointerException | IllegalStateException ignored) {
+      return -1;
+    }
+  }
+
   // You can use SubscribeEvent and let the Event Bus discover methods to call
   @SubscribeEvent
   public void onDespawn(MobDespawnEvent event) {
-    Entity ent = event.getEntity();
-    if (Config.despawnDelay >= ent.tickCount) {
+    final Entity entity = event.getEntity();
+    if (entity.tickCount <= this.getDespawnDelay()) {
       event.setResult(MobDespawnEvent.Result.DENY);
     }
   }
